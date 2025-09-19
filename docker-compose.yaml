@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:18rc1-bookworm
+    container_name: pos_db
+    ports:
+      - '5445:5432'
+    environment:
+      POSTGRES_USER: 'pos'
+      POSTGRES_PASSWORD: 'pos'
+      POSTGRES_DB: 'pos'
+    volumes:
+      - pos_pgdata:/var/lib/postgresql/data
+
+volumes:
+  pos_pgdata:
