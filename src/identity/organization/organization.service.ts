@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ForbiddenException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -19,7 +20,10 @@ import {
 } from './organization.dto';
 import { UserOrganizationRole } from './organization.types';
 import { User } from '../user/user.entity';
-import { MailService } from 'src/common/mail/mail.service';
+import {
+  MAIL_PROVIDER,
+  type MailServiceI,
+} from 'src/common/mail/mail.interface';
 
 @Injectable()
 export class OrganizationService {
@@ -31,7 +35,7 @@ export class OrganizationService {
     private readonly organizationMembersRepository: Repository<OrganizationMembers>,
     @InjectRepository(OrganizationMemberInvitation)
     private readonly organizationMemberInvitation: Repository<OrganizationMemberInvitation>,
-    private readonly mailService: MailService,
+    @Inject(MAIL_PROVIDER) private readonly mailService: MailServiceI,
   ) {}
 
   async create(

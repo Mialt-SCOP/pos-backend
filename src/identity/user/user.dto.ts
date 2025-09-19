@@ -1,14 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail } from 'class-validator';
-
-export class PasswordlessAuthDto {
-  @ApiProperty({
-    example: 'louise.michel@commune.paris',
-    description: 'Email address of the user',
-  })
-  @IsEmail()
-  email: string;
-}
+import { PasswordlessAuthDto } from '../auth/passwordLess.dto';
 
 export class SignInDto extends PasswordlessAuthDto {
   @ApiProperty({
@@ -16,14 +7,6 @@ export class SignInDto extends PasswordlessAuthDto {
     description: 'Password of the user',
   })
   password: string;
-}
-
-export class RegisterDto extends SignInDto {
-  @ApiProperty({
-    example: 'Louise Michel',
-    description: 'Name of the user',
-  })
-  displayName: string;
 }
 
 export class UserDto {
