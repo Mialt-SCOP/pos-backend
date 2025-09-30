@@ -12,9 +12,21 @@ import { UserOrganizationRole } from '../organization/organization.types';
 import { JwtCreatePayload } from './auth.dto';
 import { UserService } from '../user/user.service';
 import { User } from '../user/user.entity';
+import { OrganizationService } from '../organization/organization.service';
+import { Organization } from '../organization/organization.entity';
 
-export type Request = FastifyRequest & { user: User | null };
-export type AuthenticatedRequest = FastifyRequest & { user: User };
+export type Request = FastifyRequest & {
+  user: User | null;
+  organization: Organization | null;
+  role: UserOrganizationRole | null;
+};
+export type AuthenticatedRequest = FastifyRequest & {
+  user: User;
+};
+export type AuthenticatedRequestWithOrganization = AuthenticatedRequest & {
+  organization: Organization;
+  role: UserOrganizationRole;
+};
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -22,6 +34,7 @@ export class AuthGuard implements CanActivate {
     private readonly jwtService: JwtService,
     private readonly reflector: Reflector,
     private readonly userService: UserService,
+    private readonly organizationService: OrganizationService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -30,6 +43,7 @@ export class AuthGuard implements CanActivate {
       context.getClass(),
     ]);
     const request = await this.setUserFromTokenIfExists(context);
+    await this.setOrganization(request);
     if (isPublic) {
       // 💡 See this condition
       return true;
@@ -41,16 +55,24 @@ export class AuthGuard implements CanActivate {
     if (!request.user) throw new UnauthorizedException();
 
     if (!requiredRoles) return true;
-    // TODO: check user role
-    return true;
+
+    return (
+      !!request.role &&
+      (request.role === UserOrganizationRole.OWNER ||
+        request.role === UserOrganizationRole.ADMIN ||
+        requiredRoles.includes(request.role))
+    );
   }
 
   private async setUserFromTokenIfExists(
     context: ExecutionContext,
   ): Promise<Request> {
+    console.log('setUserFromTokenIfExists');
     const request = context.switchToHttp().getRequest<Request>();
     request.user = null;
+    console.log('extractTokenFromHeader');
     const token = this.extractTokenFromHeader(request);
+    console.log('token', token);
     if (token) {
       try {
         const payload =
@@ -63,6 +85,22 @@ export class AuthGuard implements CanActivate {
       }
     }
     return request;
+  }
+
+  private async setOrganization(request: Request) {
+    const user = request.user;
+    if (!user) return;
+    const { organizationId } = request.params as { organizationId?: string };
+    if (!organizationId) return;
+    const organization = await this.organizationService.findOne(organizationId);
+    if (!organization || !organization.isActive) {
+      throw new UnauthorizedException('This organization does not exist');
+    }
+    const member = organization.members.find((m) => m.userId === user.id);
+    if (member) {
+      request.organization = organization;
+      request.role = member.role;
+    }
   }
 
   private extractTokenFromHeader(request: FastifyRequest): string | undefined {

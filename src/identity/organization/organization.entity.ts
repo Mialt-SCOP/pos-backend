@@ -12,6 +12,11 @@ import {
 } from 'typeorm';
 import { UserOrganizationRole } from './organization.types';
 import { User } from '../user/user.entity';
+import {
+  InviteMemberDto,
+  OrganizationMembersDto,
+  OrganizationSummary,
+} from './organization.dto';
 
 @Entity()
 export class Organization {
@@ -20,6 +25,9 @@ export class Organization {
 
   @Column()
   name: string;
+
+  @Column({ type: 'char', length: 3, default: 'EUR' })
+  currency: string;
 
   @Column({ default: true })
   isActive: boolean;
@@ -46,6 +54,13 @@ export class Organization {
   @BeforeUpdate()
   beforeUpdateActions() {
     this.updatedAt = new Date();
+  }
+
+  toSummaryDto(): OrganizationSummary {
+    return {
+      id: this.id,
+      name: this.name,
+    };
   }
 }
 
@@ -82,6 +97,13 @@ export class OrganizationMembers {
     referencedColumnName: 'id',
   })
   public organization: Relation<Organization>;
+
+  toDto(): OrganizationMembersDto {
+    return {
+      ...this.user.toDto(),
+      role: this.role,
+    };
+  }
 }
 
 @Entity()
@@ -133,5 +155,15 @@ export class OrganizationMemberInvitation {
   @BeforeUpdate()
   beforeUpdateActions() {
     this.updatedAt = new Date();
+  }
+
+  toDto(): InviteMemberDto {
+    return {
+      id: this.id,
+      email: this.email,
+      role: this.role,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+    };
   }
 }

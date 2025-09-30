@@ -5,6 +5,7 @@ import {
   BeforeInsert,
   BeforeUpdate,
 } from 'typeorm';
+import { UserDto } from './user.dto';
 
 @Entity()
 export class User {
@@ -13,6 +14,9 @@ export class User {
 
   @Column()
   displayName: string;
+
+  @Column({ unique: true })
+  username: string;
 
   @Column({ unique: true })
   email: string;
@@ -39,5 +43,16 @@ export class User {
   @BeforeUpdate()
   beforeUpdateActions() {
     this.updatedAt = new Date();
+  }
+
+  toDto(): UserDto {
+    return {
+      id: this.id,
+      displayName: this.displayName,
+      username: this.username,
+      isActive: this.isActive,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+    };
   }
 }

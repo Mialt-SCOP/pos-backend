@@ -13,8 +13,9 @@ export class UserService {
     private readonly hasherService: HasherService,
   ) {}
 
-  async create(createUserDto: RegisterDto): Promise<User> {
+  async register(createUserDto: RegisterDto): Promise<User> {
     const user = new User();
+    user.username = createUserDto.username;
     user.displayName = createUserDto.displayName;
     if (createUserDto.email) {
       user.email = createUserDto.email;
@@ -22,7 +23,7 @@ export class UserService {
     if (createUserDto.password) {
       user.password = await this.hasherService.hash(createUserDto.password);
     }
-    return this.usersRepository.save(user);
+    return await this.usersRepository.save(user);
   }
 
   async findByIds(ids: string[]): Promise<User[]> {
@@ -45,6 +46,18 @@ export class UserService {
     return this.usersRepository.findOne({
       where: { email },
     });
+  }
+
+  async findByUsername(username: string): Promise<User | null> {
+    const user = await this.usersRepository.findOne({
+      where: { username },
+    });
+    if (!user) {
+      return this.usersRepository.findOne({
+        where: { email: username },
+      });
+    }
+    return user;
   }
 
   async setNewPassword(user: User, newPassword: string) {

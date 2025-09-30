@@ -26,7 +26,7 @@ import {
   SetNewPasswordDto,
 } from './resetPassword/resetPassword.dto';
 
-@ApiTags('auth')
+@ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -42,7 +42,7 @@ export class AuthController {
   @ApiResponse({ status: 200, type: AuthResult })
   @ApiResponse({ status: 404, description: 'Not Found.' })
   signIn(@Body() signInDto: SignInDto): Promise<AuthResult> {
-    return this.authService.signIn(signInDto.email, signInDto.password);
+    return this.authService.signIn(signInDto);
   }
 
   @Public()

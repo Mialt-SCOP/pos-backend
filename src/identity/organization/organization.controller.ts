@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   Param,
   UnauthorizedException,
+  Query,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OrganizationService } from './organization.service';
@@ -17,7 +18,8 @@ import {
   InviteMemberDto,
   OrganizationDetailsDto,
   OrganizationInvitation,
-  PendingInvitation,
+  OrganizationMembersDto,
+  OrganizationSummary,
   SuccessResponse,
 } from './organization.dto';
 import { Organization, OrganizationMembers } from './organization.entity';
@@ -26,11 +28,16 @@ import { JwtPayload } from '../auth/auth.dto';
 import { Roles } from '../auth/auth.decorators';
 import { UserOrganizationRole } from './organization.types';
 import { User } from '../user/user.entity';
+import type {
+  AuthenticatedRequest,
+  AuthenticatedRequestWithOrganization,
+} from '../auth/auth.guard';
+import { PaginatedResultsI, PaginationDto } from 'src/common/pagination';
 
 const getUserIdFromOrganizationMember = (member: OrganizationMembers) =>
   member.userId;
 
-@ApiTags('organization')
+@ApiTags('Organization')
 @Controller('organization')
 export class OrganizationController {
   constructor(
@@ -39,16 +46,27 @@ export class OrganizationController {
   ) {}
 
   @HttpCode(HttpStatus.OK)
+  @Get('')
+  @ApiOperation({ summary: 'List all organizations' })
+  @ApiResponse({ status: 200, type: [OrganizationSummary] })
+  @ApiResponse({ status: 404, description: 'Not Found.' })
+  async fetchOrganizations(
+    @Request() req: AuthenticatedRequest,
+  ): Promise<OrganizationSummary[]> {
+    console.log('req.user', req.user);
+    return this.organizationService.findAll(req.user);
+  }
+
+  @HttpCode(HttpStatus.OK)
   @Post('')
   @ApiOperation({ summary: 'Create a new organization' })
   @ApiResponse({ status: 200, type: Organization })
   @ApiResponse({ status: 404, description: 'Not Found.' })
   createOrganization(
     @Body() createOrganizationData: CreateOrganizationDto,
-    @Request() req: Request & { user: JwtPayload },
+    @Request() req: AuthenticatedRequest,
   ): Promise<Organization> {
-    const userId = req.user.sub;
-    return this.organizationService.create(createOrganizationData, userId);
+    return this.organizationService.create(createOrganizationData, req.user);
   }
 
   @Roles(UserOrganizationRole.ADMIN, UserOrganizationRole.OWNER)
@@ -58,7 +76,7 @@ export class OrganizationController {
   @ApiResponse({ status: 200, type: OrganizationDetailsDto })
   @ApiResponse({ status: 404, description: 'Not Found.' })
   async fetchOrganization(
-    @Request() req: Request & { organization: Organization },
+    @Request() req: AuthenticatedRequestWithOrganization,
   ): Promise<OrganizationDetailsDto> {
     const organization = req.organization;
     const users = await this.usersService.findByIds(
@@ -76,8 +94,7 @@ export class OrganizationController {
       id: organization.id,
       name: organization.name,
       members: organization.members.map((member) => ({
-        id: member.userId,
-        displayName: userById[member.userId]?.displayName || '',
+        ...userById[member.userId].toDto(),
         role: member.role,
       })),
     };
@@ -90,23 +107,34 @@ export class OrganizationController {
   @ApiResponse({ status: 200, type: SuccessResponse })
   @ApiResponse({ status: 404, description: 'Not Found.' })
   async inviteMember(
-    @Request() req: Request & { user: JwtPayload; organization: Organization },
+    @Request() req: AuthenticatedRequestWithOrganization,
     @Body() inviteMemberData: InviteMemberDto,
-  ): Promise<SuccessResponse> {
+  ): Promise<InviteMemberDto> {
     const organization = req.organization;
-    const user = await this.usersService.findOne(req.user.sub);
-    if (!user) {
-      throw new UnauthorizedException();
-    }
     const response = await this.organizationService.inviteMember(
-      user,
+      req.user,
       organization,
       inviteMemberData,
     );
 
-    return {
-      success: response,
-    };
+    return response;
+  }
+
+  @Roles(UserOrganizationRole.OWNER, UserOrganizationRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @Get(':organizationId/members')
+  @ApiOperation({ summary: 'List members of an organization' })
+  @ApiResponse({ status: 200, type: SuccessResponse })
+  @ApiResponse({ status: 404, description: 'Not Found.' })
+  async listMembers(
+    @Request() req: AuthenticatedRequestWithOrganization,
+    @Query() paginationDto: PaginationDto,
+  ): Promise<PaginatedResultsI<OrganizationMembersDto>> {
+    const organization = req.organization;
+    return await this.organizationService.findOrganizationMembers(
+      organization,
+      paginationDto,
+    );
   }
 
   @Roles(UserOrganizationRole.OWNER, UserOrganizationRole.ADMIN)
@@ -119,9 +147,13 @@ export class OrganizationController {
   @ApiResponse({ status: 200, type: SuccessResponse })
   @ApiResponse({ status: 404, description: 'Not Found.' })
   async getPendingInvitation(
-    @Request() req: Request & { organization: Organization },
-  ): Promise<PendingInvitation[]> {
-    return this.organizationService.getInvitedPeople(req.organization);
+    @Request() req: AuthenticatedRequestWithOrganization,
+    @Query() paginationDto: PaginationDto,
+  ): Promise<PaginatedResultsI<InviteMemberDto>> {
+    return this.organizationService.getInvitedPeople(
+      req.organization,
+      paginationDto,
+    );
   }
 
   @HttpCode(HttpStatus.OK)

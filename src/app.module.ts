@@ -1,12 +1,17 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
-import { TypeORMConfig } from './db/db.config';
-import { DbModule } from './db/db.module';
+import { TypeORMConfig } from './common/db/db.config';
+import { DbModule } from './common/db/db.module';
 import { IdentityConfig } from './identity/identity.config';
 import { MailConfig } from './common/mail/mail.config';
 import { IdentityModule } from './identity/identity.module';
 import { AppConfig } from './app.config';
+import { CatalogModule } from './catalog/catalog.module';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './identity/auth/auth.guard';
+import { UserModule } from './identity/user/user.module';
+import { OrganizationModule } from './identity/organization/organization.module';
 
 @Module({
   imports: [
@@ -20,11 +25,19 @@ import { AppConfig } from './app.config';
         ...MailConfig.getConfigValidation(),
       }),
     }),
-
     DbModule,
+
     IdentityModule,
+    UserModule, // Needed for AuthGuard
+    OrganizationModule, // Needed for AuthGuard
+    CatalogModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+  ],
 })
 export class AppModule {}

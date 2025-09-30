@@ -1,8 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { PasswordlessAuthDto } from './passwordLess.dto';
 import { UserDto } from '../user/user.dto';
+import { IsEmail } from 'class-validator';
 
-export class SignInDto extends PasswordlessAuthDto {
+export class SignInDto {
+  @ApiProperty({
+    example: 'louise.michel',
+    description: 'Username of the user',
+  })
+  username: string;
+
   @ApiProperty({
     example: 'Vive la commune libre 1871',
     description: 'Password of the user',
@@ -11,6 +17,13 @@ export class SignInDto extends PasswordlessAuthDto {
 }
 
 export class RegisterDto extends SignInDto {
+  @ApiProperty({
+    example: 'louise.michel@commune.paris',
+    description: 'Email address of the user',
+  })
+  @IsEmail()
+  email: string;
+
   @ApiProperty({
     example: 'Louise Michel',
     description: 'Name of the user',

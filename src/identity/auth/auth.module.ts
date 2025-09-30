@@ -11,6 +11,7 @@ import { HasherModule } from '../hasher/hasher.module';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
 import { IdentityConfig } from '../identity.config';
+import { OrganizationModule } from '../organization/organization.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { IdentityConfig } from '../identity.config';
     }),
     TypeOrmModule.forFeature([PasswordLessTemporaryPin]),
     UserModule,
+    OrganizationModule,
     ResetPasswordModule,
     MailModule,
     HasherModule,

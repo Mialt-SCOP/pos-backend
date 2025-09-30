@@ -39,6 +39,12 @@ export class OrganizationDetailsDto extends OrganizationSummary {
 
 export class InviteMemberDto {
   @ApiProperty({
+    example: '6d8ec82b-4d46-4986-baca-4c54118dca6b',
+    description: 'Id of the invited member',
+  })
+  id: string;
+
+  @ApiProperty({
     example: 'louise.michel@commune.paris',
     description: 'email of the new invited member',
   })
@@ -51,6 +57,18 @@ export class InviteMemberDto {
     description: 'Role of the user in the organization',
   })
   role: UserOrganizationRole;
+
+  @ApiProperty({
+    example: '2023-07-16T21:49:12Z',
+    description: 'Datetime in iso format when the invitation has been created',
+  })
+  createdAt: Date;
+
+  @ApiProperty({
+    example: '2023-07-16T21:49:12Z',
+    description: 'Datetime in iso format when the invitation has been updated',
+  })
+  updatedAt: Date;
 }
 
 export class SuccessResponse {

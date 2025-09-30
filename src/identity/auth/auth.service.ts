@@ -26,6 +26,7 @@ import { AppConfig } from 'src/app.config';
 import { User } from '../user/user.entity';
 import { userToDto } from '../user/user.utils';
 import { PasswordlessAuthDto } from './passwordLess.dto';
+import { SignInDto } from '../user/user.dto';
 
 @Injectable()
 export class AuthService {
@@ -39,9 +40,12 @@ export class AuthService {
     private readonly appConfig: AppConfig,
   ) {}
 
-  async signIn(email: string, password: string): Promise<AuthResult> {
-    const user = await this.userService.findByEmail(email);
-    if (!user || !(await this.hasherService.verify(password, user.password))) {
+  async signIn(payload: SignInDto): Promise<AuthResult> {
+    const user = await this.userService.findByUsername(payload.username);
+    if (
+      !user ||
+      !(await this.hasherService.verify(payload.password, user.password))
+    ) {
       throw new UnauthorizedException();
     }
 
@@ -67,7 +71,7 @@ export class AuthService {
   }
 
   async register(payload: RegisterDto): Promise<AuthResult> {
-    let user = await this.userService.findByEmail(payload.email);
+    let user = await this.userService.findByUsername(payload.username);
     if (
       user &&
       !(await this.hasherService.verify(payload.password, user.password))
@@ -75,7 +79,7 @@ export class AuthService {
       throw new UnauthorizedException();
     }
     if (!user) {
-      user = await this.userService.create(payload);
+      user = await this.userService.register(payload);
     }
     return this.getAccessToken(user);
   }

@@ -22,5 +22,6 @@ import { UserModule } from '../user/user.module';
   ],
   controllers: [OrganizationController],
   providers: [OrganizationService],
+  exports: [OrganizationService],
 })
 export class OrganizationModule {}
