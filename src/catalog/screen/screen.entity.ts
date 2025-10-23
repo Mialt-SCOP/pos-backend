@@ -76,7 +76,13 @@ export class Screen {
       updatedAt: this.updatedAt,
       active: true,
       children: [],
-      products: this.productOnScreens.map((p) => p.toDto()),
+      products: this.productOnScreens
+        .sort((a, b) => {
+          if (a.rank < b.rank) return -1;
+          if (a.rank > b.rank) return 1;
+          return 0;
+        })
+        .map((p) => p.toDto()),
     };
   }
 }

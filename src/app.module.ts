@@ -12,6 +12,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './identity/auth/auth.guard';
 import { UserModule } from './identity/user/user.module';
 import { OrganizationModule } from './identity/organization/organization.module';
+import { RedisConfig } from './common/redis/redis.config';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { OrganizationModule } from './identity/organization/organization.module'
         ...TypeORMConfig.getConfigValidation(),
         ...IdentityConfig.getConfigValidation(),
         ...MailConfig.getConfigValidation(),
+        ...RedisConfig.getConfigValidation(),
       }),
     }),
     DbModule,

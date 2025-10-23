@@ -57,13 +57,24 @@ export class AuthResult {
   @ApiProperty({
     example:
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0aXRpIHRvdG8iLCJuYW1lIjoiVGl0aSBUb3RvIiwiaWF0IjoxNjg4NTgzMTcwLCJleHAiOjE2ODkxODc5NzB9.C4Wm911ugYvj_dUb1ClPr4r4Usf5W07kRkP1boOWP2E',
-    description: 'Identifier of the user',
+    description: 'Short lifetime Authentication token',
     required: true,
   })
   token: string;
 
+  @ApiProperty({
+    example:
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0aXRpIHRvdG8iLCJuYW1lIjoiVGl0aSBUb3RvIiwiaWF0IjoxNjg4NTgzMTcwLCJleHAiOjE2ODkxODc5NzB9.C4Wm911ugYvj_dUb1ClPr4r4Usf5W07kRkP1boOWP2E',
+    description: 'Refresh token',
+    required: true,
+  })
+  refresh_token: string;
+
   @ApiProperty()
   user: UserDto;
+
+  @ApiProperty()
+  challenge: string;
 }
 
 export class JwtCreatePayload {
@@ -98,4 +109,14 @@ export class JwtPayload extends JwtCreatePayload {
     description: 'Timestamp in seconds of the expiration date of the token',
   })
   exp: number;
+}
+
+export class RefreshTokenDto {
+  @ApiProperty({
+    example:
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0aXRpIHRvdG8iLCJuYW1lIjoiVGl0aSBUb3RvIiwiaWF0IjoxNjg4NTgzMTcwLCJleHAiOjE2ODkxODc5NzB9.C4Wm911ugYvj_dUb1ClPr4r4Usf5W07kRkP1boOWP2E',
+    description: 'Refresh token',
+    required: true,
+  })
+  refresh_token: string;
 }

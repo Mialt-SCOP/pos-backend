@@ -114,4 +114,10 @@ export class OrganizationInvitation {
     description: 'Role of the user in the organization',
   })
   role: UserOrganizationRole;
+
+  @ApiProperty({
+    example: 'louise.michel@commune.paris',
+    description: 'email of the new invited member',
+  })
+  email: string;
 }

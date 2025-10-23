@@ -67,12 +67,10 @@ export class AuthGuard implements CanActivate {
   private async setUserFromTokenIfExists(
     context: ExecutionContext,
   ): Promise<Request> {
-    console.log('setUserFromTokenIfExists');
     const request = context.switchToHttp().getRequest<Request>();
     request.user = null;
-    console.log('extractTokenFromHeader');
+
     const token = this.extractTokenFromHeader(request);
-    console.log('token', token);
     if (token) {
       try {
         const payload =

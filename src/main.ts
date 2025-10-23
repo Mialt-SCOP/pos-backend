@@ -1,3 +1,4 @@
+import fastifyCookie from '@fastify/cookie';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
@@ -7,6 +8,7 @@ import {
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { IdentityConfig } from './identity/identity.config';
 
 types.setTypeParser(1700, (val: string) => {
   return parseFloat(val);
@@ -18,8 +20,18 @@ async function bootstrap() {
     AppModule,
     new FastifyAdapter(),
   );
+
+  const identityConfig = app.get(IdentityConfig);
+  await app.register(fastifyCookie, {
+    secret: identityConfig.cookiesSecret,
+  });
+
   app.enableCors({
-    origin: ['http://localhost:5173'],
+    origin: [
+      'http://localhost:5173',
+      'http://localhost:8081',
+      'https://1f7142d3e88c.ngrok-free.app',
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   });

@@ -170,6 +170,7 @@ export class OrganizationService {
     const invitation = await this.organizationMemberInvitation.findOne({
       where: {
         id: invitationId,
+        used: false,
       },
       relations: ['organization'],
     });
@@ -182,6 +183,7 @@ export class OrganizationService {
         name: invitation.organization.name,
       },
       role: invitation.role,
+      email: invitation.email,
     };
   }
 
@@ -189,7 +191,7 @@ export class OrganizationService {
     organization: Organization,
     user: User,
     invitationId: string,
-  ): Promise<boolean> {
+  ): Promise<true> {
     const invitation = await this.organizationMemberInvitation.findOneBy({
       id: invitationId,
     });

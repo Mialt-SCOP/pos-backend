@@ -24,7 +24,6 @@ import {
 } from './organization.dto';
 import { Organization, OrganizationMembers } from './organization.entity';
 import { UserService } from '../user/user.service';
-import { JwtPayload } from '../auth/auth.dto';
 import { Roles } from '../auth/auth.decorators';
 import { UserOrganizationRole } from './organization.types';
 import { User } from '../user/user.entity';
@@ -178,11 +177,11 @@ export class OrganizationController {
   @ApiResponse({ status: 200, type: SuccessResponse })
   @ApiResponse({ status: 404, description: 'Not Found.' })
   async acceptInvitation(
-    @Request() req: Request & { user: JwtPayload },
+    @Request() req: AuthenticatedRequest,
     @Param('organizationId', ParseUUIDPipe) organizationId: string,
     @Param('invitationId', ParseUUIDPipe) invitationId: string,
   ): Promise<SuccessResponse> {
-    const user = await this.usersService.findOne(req.user.sub);
+    const user = req.user;
     if (!user) {
       throw new UnauthorizedException();
     }

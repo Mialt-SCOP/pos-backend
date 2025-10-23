@@ -1,4 +1,4 @@
-import { randomInt } from 'crypto';
+import { randomBytes, randomInt } from 'crypto';
 import {
   BadRequestException,
   Inject,
@@ -27,6 +27,7 @@ import { User } from '../user/user.entity';
 import { userToDto } from '../user/user.utils';
 import { PasswordlessAuthDto } from './passwordLess.dto';
 import { SignInDto } from '../user/user.dto';
+import { RedisService } from 'src/common/redis/redis.service';
 
 @Injectable()
 export class AuthService {
@@ -38,6 +39,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     @Inject(MAIL_PROVIDER) private readonly mailService: MailServiceI,
     private readonly appConfig: AppConfig,
+    private readonly redisService: RedisService,
   ) {}
 
   async signIn(payload: SignInDto): Promise<AuthResult> {
@@ -58,10 +60,25 @@ export class AuthService {
 
   public async getAccessToken(user: User): Promise<AuthResult> {
     const payload = this.getPayload(user);
+    const challenge = randomBytes(32).toString('base64url');
+    await this.redisService.set(`challenge:${challenge}`, user.id);
     return {
-      token: await this.jwtService.signAsync(payload),
+      token: await this.jwtService.signAsync(payload, { expiresIn: 60 * 60 }),
+      refresh_token: await this.jwtService.signAsync(payload, {
+        expiresIn: 60 * 60 * 24 * 7,
+      }),
       user: userToDto(user),
+      challenge,
     };
+  }
+
+  async refreshToken(token: string | undefined): Promise<AuthResult> {
+    if (!token) throw new UnauthorizedException();
+    const refreshToken =
+      await this.jwtService.verifyAsync<JwtCreatePayload>(token);
+    const user = await this.userService.findOne(refreshToken.sub);
+    if (!user) throw new UnauthorizedException();
+    return this.getAccessToken(user);
   }
 
   private async createPasswordlessToken(user: User): Promise<string> {
