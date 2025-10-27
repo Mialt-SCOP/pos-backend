@@ -12,7 +12,7 @@ import {
 import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import { ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/identity/auth/auth.decorators';
-import type { AuthenticatedRequestWithOrganization } from 'src/identity/auth/auth.guard';
+import type { AuthenticatedRequestWithOrganization } from 'src/common/Request';
 import { UserOrganizationRole } from 'src/identity/organization/organization.types';
 import {
   ProductCreatePayload,

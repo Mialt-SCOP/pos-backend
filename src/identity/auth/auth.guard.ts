@@ -11,22 +11,8 @@ import { IS_PUBLIC_KEY, ROLES_KEY } from './auth.decorators';
 import { UserOrganizationRole } from '../organization/organization.types';
 import { JwtCreatePayload } from './auth.dto';
 import { UserService } from '../user/user.service';
-import { User } from '../user/user.entity';
 import { OrganizationService } from '../organization/organization.service';
-import { Organization } from '../organization/organization.entity';
-
-export type Request = FastifyRequest & {
-  user: User | null;
-  organization: Organization | null;
-  role: UserOrganizationRole | null;
-};
-export type AuthenticatedRequest = FastifyRequest & {
-  user: User;
-};
-export type AuthenticatedRequestWithOrganization = AuthenticatedRequest & {
-  organization: Organization;
-  role: UserOrganizationRole;
-};
+import { Request } from 'src/common/Request';
 
 @Injectable()
 export class AuthGuard implements CanActivate {

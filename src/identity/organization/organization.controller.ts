@@ -30,7 +30,7 @@ import { User } from '../user/user.entity';
 import type {
   AuthenticatedRequest,
   AuthenticatedRequestWithOrganization,
-} from '../auth/auth.guard';
+} from 'src/common/Request';
 import { PaginatedResultsI, PaginationDto } from 'src/common/pagination';
 
 const getUserIdFromOrganizationMember = (member: OrganizationMembers) =>
@@ -52,7 +52,6 @@ export class OrganizationController {
   async fetchOrganizations(
     @Request() req: AuthenticatedRequest,
   ): Promise<OrganizationSummary[]> {
-    console.log('req.user', req.user);
     return this.organizationService.findAll(req.user);
   }
 

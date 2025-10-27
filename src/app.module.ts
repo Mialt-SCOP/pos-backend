@@ -13,6 +13,8 @@ import { AuthGuard } from './identity/auth/auth.guard';
 import { UserModule } from './identity/user/user.module';
 import { OrganizationModule } from './identity/organization/organization.module';
 import { RedisConfig } from './common/redis/redis.config';
+import { IdempotencyModule } from './common/idempotency/idempotency.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -29,10 +31,12 @@ import { RedisConfig } from './common/redis/redis.config';
     }),
     DbModule,
 
+    IdempotencyModule,
     IdentityModule,
     UserModule, // Needed for AuthGuard
     OrganizationModule, // Needed for AuthGuard
     CatalogModule,
+    PaymentModule,
   ],
   controllers: [],
   providers: [

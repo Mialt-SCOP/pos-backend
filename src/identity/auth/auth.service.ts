@@ -3,9 +3,10 @@ import {
   BadRequestException,
   Inject,
   Injectable,
+  InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { JwtService, TokenExpiredError } from '@nestjs/jwt';
 import {
   AuthResult,
   JwtCreatePayload,
@@ -72,10 +73,23 @@ export class AuthService {
     };
   }
 
+  async verifyToken(token: string): Promise<JwtCreatePayload> {
+    try {
+      return await this.jwtService.verifyAsync<JwtCreatePayload>(token);
+    } catch (error) {
+      console.log(error);
+      if (error instanceof TokenExpiredError) {
+        throw new BadRequestException('Expired token');
+      }
+      throw new InternalServerErrorException();
+    }
+  }
+
   async refreshToken(token: string | undefined): Promise<AuthResult> {
     if (!token) throw new UnauthorizedException();
-    const refreshToken =
-      await this.jwtService.verifyAsync<JwtCreatePayload>(token);
+
+    const refreshToken = await this.verifyToken(token);
+
     const user = await this.userService.findOne(refreshToken.sub);
     if (!user) throw new UnauthorizedException();
     return this.getAccessToken(user);

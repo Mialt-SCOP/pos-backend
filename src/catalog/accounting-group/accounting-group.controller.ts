@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Query, Request } from '@nestjs/common';
 import { AccountingGroupService } from './accounting-group.service';
 import { Roles } from 'src/identity/auth/auth.decorators';
 import { UserOrganizationRole } from 'src/identity/organization/organization.types';
-import type { AuthenticatedRequestWithOrganization } from 'src/identity/auth/auth.guard';
+import type { AuthenticatedRequestWithOrganization } from 'src/common/Request';
 import { PaginationDto } from 'src/common/pagination';
 import { AccountingGroupCreatePayload } from './accounting-group.dto';
 import { ApiTags } from '@nestjs/swagger';

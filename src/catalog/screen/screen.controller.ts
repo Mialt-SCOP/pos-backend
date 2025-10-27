@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { Roles } from 'src/identity/auth/auth.decorators';
 import { UserOrganizationRole } from 'src/identity/organization/organization.types';
-import type { AuthenticatedRequestWithOrganization } from 'src/identity/auth/auth.guard';
+import type { AuthenticatedRequestWithOrganization } from 'src/common/Request';
 import { ApiTags } from '@nestjs/swagger';
 import { ScreenService } from './screen.service';
 import {
