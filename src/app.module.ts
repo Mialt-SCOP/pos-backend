@@ -15,6 +15,7 @@ import { OrganizationModule } from './identity/organization/organization.module'
 import { RedisConfig } from './common/redis/redis.config';
 import { IdempotencyModule } from './common/idempotency/idempotency.module';
 import { PaymentModule } from './payment/payment.module';
+import { EventModule } from './event/event.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { PaymentModule } from './payment/payment.module';
     OrganizationModule, // Needed for AuthGuard
     CatalogModule,
     PaymentModule,
+    EventModule,
   ],
   controllers: [],
   providers: [
